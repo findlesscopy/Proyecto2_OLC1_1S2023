@@ -1,16 +1,41 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const navigation = [
   { name: "Compilar", href: "#", current: false },
+  { name: "Inicio", href: "#", current: false },
 ];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Example() {
+export default function Example({
+  onCreateNewFile,
+  onFileUpload,
+  onSaveFile,
+  onPrintConsole,
+}) {
+  const [fileContent, setFileContent] = useState("");
+
+  function handleFileChange(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFileContent(event.target.result);
+      onFileUpload(event.target.result); // enviar el contenido del archivo al componente padre
+    };
+    reader.readAsText(file);
+  }
+
+  function handleCreateNewFile() {
+    setFileContent("");
+    onCreateNewFile();
+  }
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -20,6 +45,22 @@ export default function Example() {
               <div className="flex flex-2 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
+                    {navigation.slice(1).map((item) => (
+                      <Link
+                        key={item.name}
+                        to="/"
+                        onClick={onPrintConsole}
+                        className={classNames(
+                          item.current
+                            ? "bg-gray-900 text-white"
+                            : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                          "rounded-md px-3 py-2 text-sm font-medium"
+                        )}
+                        aria-current={item.current ? "page" : undefined}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
                     <Menu as="div" className="relative inline-block text-left">
                       <div>
                         <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 text-sm font-semibold shadow-sm ">
@@ -45,7 +86,7 @@ export default function Example() {
                             <Menu.Item>
                               {({ active }) => (
                                 <a
-                                  href="#"
+                                  onClick={handleCreateNewFile}
                                   className={classNames(
                                     active
                                       ? "bg-gray-100 text-gray-900"
@@ -60,8 +101,8 @@ export default function Example() {
                             <Menu.Item>
                               {({ active }) => (
                                 <>
-                                <label
-                                    htmlFor="file-upload"
+                                  <label
+                                    htmlFor="fileInput"
                                     className={classNames(
                                       active
                                         ? "bg-gray-100 text-gray-900"
@@ -72,22 +113,19 @@ export default function Example() {
                                     Cargar archivo
                                   </label>
                                   <input
-                                      id="file-upload"
-                                      type="file"
-                                      accept=".tw"
-                                      className="hidden"
-                                      onChange={(event) => {
-                                        console.log(event.target.files[0].name);
-                                      }}
-                                    />
-                                  </>
-                                  
+                                    id="fileInput"
+                                    type="file"
+                                    accept=".tw"
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                  />
+                                </>
                               )}
                             </Menu.Item>
                             <Menu.Item>
                               {({ active }) => (
                                 <a
-                                  href="#"
+                                  onClick={onSaveFile}
                                   className={classNames(
                                     active
                                       ? "bg-gray-100 text-gray-900"
@@ -103,10 +141,10 @@ export default function Example() {
                         </Menu.Items>
                       </Transition>
                     </Menu>
-                    {navigation.slice().map((item) => (
+                    {navigation.slice(0, 1).map((item) => (
                       <a
                         key={item.name}
-                        href={item.href}
+                        onClick={onPrintConsole}
                         className={classNames(
                           item.current
                             ? "bg-gray-900 text-white"
@@ -142,8 +180,8 @@ export default function Example() {
                           <div className="py-1">
                             <Menu.Item>
                               {({ active }) => (
-                                <a
-                                  href="#"
+                                <Link
+                                  to="/errores"
                                   className={classNames(
                                     active
                                       ? "bg-gray-100 text-gray-900"
@@ -152,13 +190,13 @@ export default function Example() {
                                   )}
                                 >
                                   Errores
-                                </a>
+                                </Link>
                               )}
                             </Menu.Item>
                             <Menu.Item>
-                            {({ active }) => (
-                                <a
-                                  href="#"
+                              {({ active }) => (
+                                <Link
+                                  to="/ast"
                                   className={classNames(
                                     active
                                       ? "bg-gray-100 text-gray-900"
@@ -167,13 +205,13 @@ export default function Example() {
                                   )}
                                 >
                                   Árbol AST
-                                </a>
+                                </Link>
                               )}
                             </Menu.Item>
                             <Menu.Item>
                               {({ active }) => (
-                                <a
-                                  href="#"
+                                <Link
+                                  to="/simbolos"
                                   className={classNames(
                                     active
                                       ? "bg-gray-100 text-gray-900"
@@ -181,8 +219,8 @@ export default function Example() {
                                     "block px-4 py-2 text-sm"
                                   )}
                                 >
-                                  Tabla de Símbolos
-                                </a>
+                                  Tabla de Simbolos
+                                </Link>
                               )}
                             </Menu.Item>
                           </div>

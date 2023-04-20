@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import CodeEditor from './CodeEditor';
+import React from 'react';
 
 function TabPanel({ value, index, children }) {
   return <div hidden={value !== index}>{children}</div>;
@@ -12,7 +13,9 @@ function CodeEditorTabs() {
   function handleChangeTab(event, newActiveTab) {
     setActiveTab(newActiveTab);
   }
-
+  const onChange = React.useCallback((value, viewUpdate) => {
+    console.log('value:', value);
+  }, []);
   function handleAddTab() {
     setTabs([...tabs, { title: `Tab ${tabs.length + 1}` }]);
   }
@@ -43,14 +46,15 @@ function CodeEditorTabs() {
   </div>
   ))}
   <button
-    className="inline-block py-2 px-4 text-gray-800 hover:bg-gray-200 cursor-pointer"
+    className="inline-block py-1 px-2 text-gray-800 hover:bg-gray-200 cursor-pointer"
     onClick={handleAddTab}
   >
     +
   </button>
   {tabs.map((tab, index) => (
         <TabPanel key={index} value={activeTab} index={index}>
-          <CodeEditor/>
+          <CodeEditor 
+              onChange={onChange}/>
         </TabPanel>
       ))}
 </div>

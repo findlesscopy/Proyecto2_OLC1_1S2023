@@ -1,18 +1,21 @@
-import { useState } from 'react';
-import CodeMirror from '@uiw/react-codemirror';
+import { useState } from "react";
+import CodeMirror from "@uiw/react-codemirror";
 
-function CodeEditor({ defaultValue }) {
-  const [value, setValue] = useState(defaultValue || '');
+function CodeEditor() {
+  const [content, setContent] = useState('');
 
-  function handleChange(editor, data, value) {
-    setValue(value);
+  function handleContentChange(event) {
+    setContent(event.target.value);
   }
 
   return (
-    <CodeMirror value={value} className='scrollbar-track-gray-300 scrollbar-thumb-gray-500 scrollbar-thin rounded-md' 
-    height='590px' 
-    theme="dark" onChange={handleChange} />
-    
+    <CodeMirror
+      className="scrollbar-track-gray-300 scrollbar-thumb-gray-500 scrollbar-thin rounded-md"
+      height="590px"
+      value={content}
+      theme="dark"
+      onChange={handleContentChange}
+    />
   );
 }
 

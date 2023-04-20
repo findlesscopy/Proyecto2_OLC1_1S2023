@@ -1,4 +1,4 @@
-/* Definicion lexica */
+/* Definición Léxica */
 %lex
 
 %options case-insensitive
@@ -6,82 +6,143 @@
 
 %%
 
-//Simbolos del lenguaje
-"=" { return IGUAL; }
-";" { return PUNTOYCOMA; }
-"{" { return LLAVEIZQ; }
-"}" { return LLAVEDER; }
-"(" { return PARENTESISIZQ; }
-")" { return PARENTESISDER; }
-"[" { return CORCHETEIZQ; }
-"]" { return CORCHETEDER; }
-"." { return PUNTO; }
 
-//Operaciones aritmeticaas
-"+" { return MAS; }
-"-" { return MENOS; }
-"*" { return POR; }
-"/" { return DIVIDIDO; }
-"^" { return POTENCIA; }
-"%" { return MODULO; }
+// simbolos reservados
+";"                 return 'PTCOMA';
+"("                 return 'PARIZQ';
+")"                 return 'PARDER';
+"."                 return 'PUNTO';
+":"                 return 'DOSPUNTOS';
+","                 return 'COMA';
+"["                 return 'CORIZR';
+"]"                 return 'CORDER';
+"{"                 return 'LLAVEIZQ';
+"}"                 return "LLAVEDER";
+"?"                 return 'KLEENE';
+"="                 return 'IGUAL';
 
-//Operadores Relacionales
-"==" { return IGUAlACION; }
-"!=" { return DIFERENCIACION;}
-"<" { return MENOR; }
-">" { return MAYOR; }
-"<=" { return MENORIGUAL; }
-">=" { return MAYORIGUAL; }
+// palabras reservadas
+"print"          return 'RPRIN';   // funcion de imprimir
+"true"              return 'TRUE';
+"false"             return 'FALSE';
 
-//Operador ternario
-"?" { return TERNARIO; }
-":" { return DOSPUNTOS; }
-
-//Operadores logicos
-"&&" { return AND; }
-"||" { return OR; }
-"!" { return NOT; }
-
-//Incremento y decremento
-"++" { return INCREMENTO; }
-"--" { return DECREMENTO; }
-
-
-//Palabras reservadas
-//Tipos de datos
-"int" { return INT; }
-"string" { return STRING; }
-"char" { return CHAR; }
-"boolean" { return BOOLEAN; }
-"double" { return DOUBLE; }
-//Listas y arreglos
-"list" { return LIST; }
-"new" { return NEW; }
-"add" { return ADD; }
-//Sentencias de control
-"if" { return IF; }
-"else" { return ELSE; }
-"else if" { return ELSEIF; }
-"switch" { return SWITCH; }
-"case" { return CASE; }
-"default" { return DEFAULT; }
-//Sentencias ciclicas
-"while" { return WHILE; }
-"for" { return FOR; }
-"do" { return DO; }
-//Sentencias de Transferencia
-"break" { return BREAK; }
-"continue" { return CONTINUE; }
-"return" { return RETURN; }
-//Funciones y Métodos
-"void" { return VOID; }
-//Funciones
-"print" { return PRINT; }
-"tolower" { return TOLOWER; }
-"toupper" { return TOUPPER; }
+// aritmeticos
+"+"                 return 'MAS';
+"-"                 return 'MENOS';
+"*"                 return 'POR';
+"/"                 return 'DIVISION';
+"^"                 return 'POTENCIA';
+"%"                 return 'MODULO';
 
 
 
 
+// tipos de variables
+"int"               return 'RENTERO';
+"string"               return 'RSTRING';
+"char"               return 'RCHAR';
+"boolean"               return 'RBOOLEAN';
+"double"               return 'RDOUBLE';
 
 
+
+/* Espacios en blanco */
+[ \r\t]+            {}                      // espacio en blanco
+\n                  {}                      // salto
+(\/\/).*                             {}     // comentario linea
+[/][*][^*]*[*]+([^/*][^*]*[*]+)*[/]  {}     // comentario multilinea
+
+[a-zA-Z][a-zA-Z0-9_]*   return 'ID';
+[0-9]+("."[0-9]+)\b     return 'DECIMAL';
+[0-9]+\b                return 'ENTERO';
+\'((\\\')|[^\n\'])*\'	{ yytext = yytext.substr(1,yyleng-2); return 'CARACTER'; }
+["]                             {cadena="";this.begin("string");}
+<string>[^"\\]+                 {cadena+=yytext;}
+<string>"\\\""                  {cadena+="\"";}
+<string>"\\n"                   {cadena+="\n";}
+<string>"\\t"                   {cadena+="\t";}
+<string>"\\\\"                  {cadena+="\\";}
+<string>"\\\'"                  {cadena+="\'";}
+<string>["]                     {yytext=cadena; this.popState(); return 'CADENA';}
+
+//\"[^\"]*\"				{ yytext = yytext.substr(1,yyleng-2); 	return 'CADENA'; }
+
+
+<<EOF>>                 return 'EOF';
+
+.                       { console.error('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column);}
+/lex
+
+%{
+  // importar tipos
+  const {Type} = require('./Abstractas/Return');
+  const {Primitivo} = require('./Expresiones/Primitivo');
+  const {Print} = require('./Instrucciones/Print');
+  const {Declarar} = require('./instruction/Declarar');
+%}
+
+
+// PRECEDENCIA DE OPERADORES
+%left 'MAS' 'MENOS'
+%left 'POR' 'DIVISION' 'MODULO'
+%right 'UMENOS '
+
+%start INICIO
+
+%% /* Definición de la gramática */
+
+INICIO
+	: INSTRUCCIONES EOF {return $1;}
+;
+
+INSTRUCCIONES
+	: INSTRUCCIONES INSTRUCCION     { $1.push($2); $$ = $1; }
+	| INSTRUCCION                   { $$ = [$1]; }
+;
+
+INSTRUCCION
+	: DEFPRINT          { $$ = $1; }
+    | DECLARAR          { $$ = $1; }
+	| error PTCOMA
+  {   console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
+;
+
+// GRAMATICA IMPRIMIR 
+DEFPRINT
+    : RPRIN PARIZQ EXPRESION PARDER PTCOMA  { $$ = new Print(@1.first_line, @1.first_column,$3); }
+;
+// print(EXPRESION);
+
+
+// GRAMATICA DECLARAR
+//  int a = 5;
+//  int a ;
+DECLARAR
+    : TIPO ID PTCOMA  { $$ = new Declarar($2,$1,null,@1.first_line, @1.first_column ); }
+    | TIPO ID IGUAL EXPRESION PTCOMA  { $$ = new Declarar($2,$1,$4,@1.first_line, @1.first_column ); }
+;
+
+
+EXPRESION
+  : PRIMITIVO       { $$ = $1; }
+;
+
+
+PRIMITIVO
+  : ENTERO          { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.INT); }
+  | DECIMAL         { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.DOUBLE); }
+  | CADENA          { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.STRING);}
+  | CARACTER        { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.CHAR); }
+  | TRUE            { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.BOOLEAN); }
+  | FALSE           { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.BOOLEAN); }
+;
+
+
+// GRAMATICA TIPO
+TIPO
+  : RENTERO         { $$ = Type.INT; }
+  | RDOUBLE         { $$ = Type.DOUBLE; }
+  | RSTRING         { $$ = Type.STRING; }
+  | RCHAR           { $$ = Type.CHAR; }
+  | RBOOLEAN        { $$ = Type.BOOLEAN; }
+;
