@@ -8,6 +8,7 @@ export class Print extends Instruccion{
 
     public execute(){
         const value = this.expresion.execute();
-        console.log("Accediendo al metodo de imprimir");
+
+        console.log(value.value);
     }
 }

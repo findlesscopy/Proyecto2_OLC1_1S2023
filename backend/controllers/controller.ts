@@ -7,19 +7,21 @@ class Controller{
     }
 
     public interpretar(req: Request, res: Response){
-        var parser = require("../interprete/gramatica");
+        var parser = require("./interprete/gramatica");
 
         const code = req.body.code;
         console.log(code)
 
         try{
-            const ast = parser.parse(code);
-           
+            parser.parse(code);
+            /*
             for(const inst of ast){
                 inst.execute();
-            }
+            }*/
+
+            res.json({consola:"Ejecucion exitosa", errores: null})
         }catch(error){
-            console.log(error);
+            console.log("errores: ",error);
             res.json({
                 consola:error,
                 errores: error

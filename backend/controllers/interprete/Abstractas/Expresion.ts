@@ -1,3 +1,4 @@
+import { Return } from "./Return";
 export abstract class Expresion{
     public line : number;
     public column : number;
@@ -6,5 +7,5 @@ export abstract class Expresion{
         this.column = column;
     }
 
-    public abstract execute(): Object;
+    public abstract execute(): Return;
 }

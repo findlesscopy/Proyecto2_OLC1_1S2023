@@ -7,44 +7,80 @@
 %%
 
 
-// simbolos reservados
-";"                 return 'PTCOMA';
-"("                 return 'PARIZQ';
-")"                 return 'PARDER';
-"."                 return 'PUNTO';
-":"                 return 'DOSPUNTOS';
-","                 return 'COMA';
-"["                 return 'CORIZR';
-"]"                 return 'CORDER';
+///Simbolos del lenguaje
+"="                 return 'IGUAL'; 
+";"                 return 'PUNTOYCOMA';
 "{"                 return 'LLAVEIZQ';
-"}"                 return "LLAVEDER";
-"?"                 return 'KLEENE';
-"="                 return 'IGUAL';
+"}"                 return 'LLAVEDER';
+"("                 return 'PARENTESISIZQ';
+")"                 return 'PARENTESISDER';
+"["                 return 'CORCHETEIZQ'; 
+"]"                 return 'CORCHETEDER'; 
+"."                 return 'PUNTO'; 
 
-// palabras reservadas
-"print"          return 'RPRIN';   // funcion de imprimir
-"true"              return 'TRUE';
+//Operaciones aritmeticaas
+"+"                 return 'MAS'; 
+"-"                 return 'MENOS'; 
+"*"                 return 'POR'; 
+"/"                 return 'DIVIDIDO'; 
+"^"                 return 'POTENCIA'; 
+"%"                 return 'MODULO'; 
+
+//Operadores Relacionales
+"=="                return 'IGUAlACION'; 
+"!="                return 'DIFERENCIACION';
+"<"                 return 'MENOR'; 
+">"                 return 'MAYOR'; 
+"<="                return 'MENORIGUAL'; 
+">="                return 'MAYORIGUAL'; 
+
+//Operador ternario
+"?"                 return 'TERNARIO'; 
+":"                 return 'DOSPUNTOS'; 
+
+//Operadores logicos
+"&&"                return 'AND'; 
+"||"                return 'OR'; 
+"!"                 return 'NOT'; 
+
+//Incremento y decremento
+"++"                return 'INCREMENTO'; 
+"--"                return 'DECREMENTO'; 
+
+"true"              return 'TRUE'; 
 "false"             return 'FALSE';
-
-// aritmeticos
-"+"                 return 'MAS';
-"-"                 return 'MENOS';
-"*"                 return 'POR';
-"/"                 return 'DIVISION';
-"^"                 return 'POTENCIA';
-"%"                 return 'MODULO';
-
-
-
-
-// tipos de variables
-"int"               return 'RENTERO';
-"string"               return 'RSTRING';
-"char"               return 'RCHAR';
-"boolean"               return 'RBOOLEAN';
-"double"               return 'RDOUBLE';
-
-
+//Palabras reservadas
+//Tipos de datos
+"int"               return 'INT'; 
+"string"            return 'STRING'; 
+"char"              return 'CHAR'; 
+"double"            return 'DOUBLE'; 
+"boolean"           return 'BOOLEAN';
+//Listas y arreglos
+"list"              return 'LIST'; 
+"new"               return 'NEW'; 
+"add"               return 'ADD'; 
+//Sentencias de control
+"if"                return 'IF'; 
+"else"              return 'ELSE'; 
+"else if"           return 'ELSEIF'; 
+"switch"            return 'SWITCH'; 
+"case"              return 'CASE'; 
+"default"           return 'DEFAULT'; 
+//Sentencias ciclicas
+"while"             return 'WHILE'; 
+"for"               return 'FOR'; 
+"do"                return 'DO'; 
+//Sentencias de Transferencia
+"break"             return 'BREAK'; 
+"continue"          return 'CONTINUE'; 
+"return"            return 'RETURN'; 
+//Funciones y Métodos
+"void"              return 'VOID'; 
+//Funciones
+"print"             return 'PRINT'; 
+"tolower"           return 'TOLOWER'; 
+"toupper"           return 'TOUPPER'; 
 
 /* Espacios en blanco */
 [ \r\t]+            {}                      // espacio en blanco
@@ -78,7 +114,6 @@
   const {Type} = require('./Abstractas/Return');
   const {Primitivo} = require('./Expresiones/Primitivo');
   const {Print} = require('./Instrucciones/Print');
-  const {Declarar} = require('./instruction/Declarar');
 %}
 
 
@@ -102,31 +137,56 @@ INSTRUCCIONES
 
 INSTRUCCION
 	: DEFPRINT          { $$ = $1; }
-    | DECLARAR          { $$ = $1; }
-	| error PTCOMA
+  | DECLARAR          { $$ = $1; }
+  | REDECLARAR        { $$ = $1; }
+	| error PUNTOYCOMA
   {   console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 ;
+EXPRESION
+  : PRIMITIVO       { $$ = $1; }
+  | CREMENTOS       { $$ = $1; }
+;
+
 
 // GRAMATICA IMPRIMIR 
 DEFPRINT
-    : RPRIN PARIZQ EXPRESION PARDER PTCOMA  { $$ = new Print(@1.first_line, @1.first_column,$3); }
+    : PRINT PARENTESISIZQ EXPRESION PARENTESISDER PUNTOYCOMA  { $$ = new Print(@1.first_line, @1.first_column,$3); }
 ;
-// print(EXPRESION);
-
-
-// GRAMATICA DECLARAR
-//  int a = 5;
-//  int a ;
+//Gramatica declarar
 DECLARAR
-    : TIPO ID PTCOMA  { $$ = new Declarar($2,$1,null,@1.first_line, @1.first_column ); }
-    | TIPO ID IGUAL EXPRESION PTCOMA  { $$ = new Declarar($2,$1,$4,@1.first_line, @1.first_column ); }
+  : TIPO ID PUNTOYCOMA 
+  | TIPO ID IGUAL EXPRESION PUNTOYCOMA
+;
+//Gramatica redeclarar
+REDECLARAR
+  : ID IGUAL EXPRESION PUNTOYCOMA
 ;
 
-
-EXPRESION
-  : PRIMITIVO       { $$ = $1; }
+//Gramatica Casteos
+CASTEOS
+  : PARENTESISIZQ TIPO PARENTESISDER EXPRESION
 ;
 
+TIPO
+  : INT { $$ = Type.INT; }
+  | STRING { $$ = Type.STRING; }
+  | CHAR { $$ = Type.CHAR; }
+  | DOUBLE { $$ = Type.DOUBLE; }
+  | BOOLEAN { $$ = Type.BOOLEAN; }
+;
+
+//Gramática de Incremento y decremento
+CREMENTOS
+  : ID INCREMENTO PUNTOYCOMA
+  | ID DECREMENTO PUNTOYCOMA
+;
+
+//Gramática de Estructuras de datos
+//Vectores
+VECTORES
+  : TIPO CORCHETEIZQ CORCHETEDER ID IGUAL NEW TIPO CORCHETEIZQ EXPRESION CORCHETEDER PUNTOYCOMA
+  | TIPO CORCHETEIZQ CORCHETEDER ID IGUAL LLAVEIZQ EXPRESION LLAVEDER PUNTOYCOMA
+;
 
 PRIMITIVO
   : ENTERO          { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.INT); }
@@ -135,14 +195,4 @@ PRIMITIVO
   | CARACTER        { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.CHAR); }
   | TRUE            { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.BOOLEAN); }
   | FALSE           { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.BOOLEAN); }
-;
-
-
-// GRAMATICA TIPO
-TIPO
-  : RENTERO         { $$ = Type.INT; }
-  | RDOUBLE         { $$ = Type.DOUBLE; }
-  | RSTRING         { $$ = Type.STRING; }
-  | RCHAR           { $$ = Type.CHAR; }
-  | RBOOLEAN        { $$ = Type.BOOLEAN; }
 ;
