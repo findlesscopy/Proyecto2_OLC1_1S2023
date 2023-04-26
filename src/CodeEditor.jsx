@@ -1,20 +1,20 @@
-import { useState } from "react";
+import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 
-function CodeEditor() {
-  const [content, setContent] = useState('');
+function CodeEditor(props) {
 
-  function handleContentChange(event) {
-    setContent(event.target.value);
-  }
+  const onChange = React.useCallback((value, viewUpdate) => {
+    console.log('value:', value);
+    props.input(value)
+  }, []);
 
   return (
     <CodeMirror
       className="scrollbar-track-gray-300 scrollbar-thumb-gray-500 scrollbar-thin rounded-md"
       height="590px"
-      value={content}
+      value='print("Hola mundo");'
       theme="dark"
-      onChange={handleContentChange}
+      onChange={onChange}
     />
   );
 }

@@ -8,7 +8,6 @@
 
 
 ///Simbolos del lenguaje
-"="                 return 'IGUAL'; 
 ";"                 return 'PUNTOYCOMA';
 "{"                 return 'LLAVEIZQ';
 "}"                 return 'LLAVEDER';
@@ -27,13 +26,13 @@
 "%"                 return 'MODULO'; 
 
 //Operadores Relacionales
-"=="                return 'IGUAlACION'; 
+"=="                return 'IGUALACION'; 
 "!="                return 'DIFERENCIACION';
 "<"                 return 'MENOR'; 
 ">"                 return 'MAYOR'; 
 "<="                return 'MENORIGUAL'; 
 ">="                return 'MAYORIGUAL'; 
-
+"="                 return 'IGUAL'; 
 //Operador ternario
 "?"                 return 'TERNARIO'; 
 ":"                 return 'DOSPUNTOS'; 
@@ -114,12 +113,26 @@
   const {Type} = require('./Abstractas/Return');
   const {Primitivo} = require('./Expresiones/Primitivo');
   const {Print} = require('./Instrucciones/Print');
+  const {Declarar} = require('./Instrucciones/Declarar');
+  const {Acceso} = require('./Expresiones/Acceso');
+  const {Aritmetica} = require('./Expresiones/Aritmetica');
+  const {TipoOperacion} = require('./Utils/TipoOperacion');
+  const {Relacionales} = require('./Expresiones/Relacionales');
+  const {TipoRelacional} = require('./Utils/TipoRelacional');
+  const {Logicos} = require('./Expresiones/Logicos');
+  const {TipoLogicos} = require('./Utils/TipoLogicos');
+
 %}
 
 
 // PRECEDENCIA DE OPERADORES
+%left 'OR'
+%left 'AND' 
+%right 'NOT'
+%left 'MENOR' 'MAYOR' 'MENORIGUAL' 'MAYORIGUAL' 'IGUALACION' 'DIFERENCIACION' 
 %left 'MAS' 'MENOS'
-%left 'POR' 'DIVISION' 'MODULO'
+%left 'POR' 'DIVIDIDO' 'MODULO'
+%left 'POTENCIA'
 %right 'UMENOS '
 
 %start INICIO
@@ -144,18 +157,51 @@ INSTRUCCION
 ;
 EXPRESION
   : PRIMITIVO       { $$ = $1; }
+  | ACCEDERVAR      { $$ = $1; }
+  | ARITMETICA      { $$ = $1; }
+  | RELACIONALES    { $$ = $1; }
+  | LOGICOS         { $$ = $1; }
   | CREMENTOS       { $$ = $1; }
 ;
 
+//GRAMÁTICA LOGICOS
+LOGICOS 
+  : EXPRESION AND EXPRESION { $$ = new Logicos($1, $3, TipoLogicos.AND, @1.first_line, @1.first_column); }
+  | EXPRESION OR EXPRESION { $$ = new Logicos($1, $3, TipoLogicos.OR, @1.first_line, @1.first_column); }
+  | NOT EXPRESION { $$ = new Logicos($2, $2, TipoLogicos.NOT, @1.first_line, @1.first_column); }
+;
 
+//GRAMÁTICA RELACIONALES
+RELACIONALES
+  : EXPRESION IGUALACION EXPRESION { $$ = new Relacionales($1, $3, TipoRelacional.IGUALACION, @1.first_line, @1.first_column); }
+  | EXPRESION DIFERENCIACION EXPRESION { $$ = new Relacionales($1, $3, TipoRelacional.DIFERENTE, @1.first_line, @1.first_column); }
+  | EXPRESION MENOR EXPRESION { $$ = new Relacionales($1, $3, TipoRelacional.MENOR, @1.first_line, @1.first_column); }
+  | EXPRESION MENORIGUAL EXPRESION { $$ = new Relacionales($1, $3, TipoRelacional.MENORIGUAL, @1.first_line, @1.first_column); }
+  | EXPRESION MAYOR EXPRESION { $$ = new Relacionales($1, $3, TipoRelacional.MAYOR, @1.first_line, @1.first_column); }
+  | EXPRESION MAYORIGUAL EXPRESION { $$ = new Relacionales($1, $3, TipoRelacional.MAYORIGUAL, @1.first_line, @1.first_column); }
+;  
+//GRAMATICA ARITMETICA
+ARITMETICA
+  : EXPRESION MAS EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.SUMA, @1.first_line, @1.first_column); }
+  | EXPRESION MENOS EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.RESTA, @1.first_line, @1.first_column); }
+  | EXPRESION POR EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.MULTIPLICACION, @1.first_line, @1.first_column); }
+  | EXPRESION DIVIDIDO EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.DIVISION, @1.first_line, @1.first_column); }
+  | EXPRESION MODULO EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.MODULO, @1.first_line, @1.first_column); }
+  | EXPRESION POTENCIA EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.POTENCIA, @1.first_line, @1.first_column); }
+  | MENOS EXPRESION %prec UMENOS { $$ = new Aritmetica($2, $2, TipoOperacion.MENOSUNARIO, @1.first_line, @1.first_column); }
+;
+//GRAMÁTICA ACCESO DE VARIABLES
+ACCEDERVAR
+  : ID  { $$ = new Acceso($1, @1.first_line, @1.first_column); }
+;
 // GRAMATICA IMPRIMIR 
 DEFPRINT
     : PRINT PARENTESISIZQ EXPRESION PARENTESISDER PUNTOYCOMA  { $$ = new Print(@1.first_line, @1.first_column,$3); }
 ;
 //Gramatica declarar
 DECLARAR
-  : TIPO ID PUNTOYCOMA 
-  | TIPO ID IGUAL EXPRESION PUNTOYCOMA
+  : TIPO ID PUNTOYCOMA { $$ = new Declarar($2, $1, null, @1.first_line, @1.first_column );}
+  | TIPO ID IGUAL EXPRESION PUNTOYCOMA { $$ = new Declarar($2, $1, $4, @1.first_line, @1.first_column );}
 ;
 //Gramatica redeclarar
 REDECLARAR

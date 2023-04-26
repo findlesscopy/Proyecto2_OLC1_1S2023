@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-
+import { printList } from "./interprete/Reportes/Printlist";
+import { Entorno } from "./interprete/Abstractas/Entorno";
 class Controller{
     
     public pong(req: Request, res: Response){
@@ -10,21 +11,35 @@ class Controller{
         var parser = require("./interprete/gramatica");
 
         const code = req.body.code;
-        console.log(code)
+        console.log("Codigo de entrada: "+code)
 
         try{
-            parser.parse(code);
-            /*
-            for(const inst of ast){
-                inst.execute();
-            }*/
+            const ast = parser.parse(code);
+            
+            try{
+                printList.splice(0, printList.length);
 
-            res.json({consola:"Ejecucion exitosa", errores: null})
-        }catch(error){
-            console.log("errores: ",error);
+                const entornoGlobal = new Entorno(null,"Global");
+
+                for(const inst of ast){
+                    inst.execute(entornoGlobal);
+                }
+
+                res.json({consola:printList.join("\n"), errores: "ninguno"})
+
+            }catch(error){
+                console.log("errores: ",error);
+                res.json({
+                    consola: "Error en la ejecucion",
+                    errores: error
+                })
+
+            }
+        }catch(err){
+            console.log("errores: ",err);
             res.json({
-                consola:error,
-                errores: error
+                consola: "Error en la ejecucion",
+                errores: err
             })
         }
     }

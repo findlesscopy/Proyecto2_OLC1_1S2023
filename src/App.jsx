@@ -1,11 +1,13 @@
 import React from "react";
-import CodeMirror from "@uiw/react-codemirror";
+import CodeEditor from "./CodeEditor";
+import Consola from "./Consola";
 import Example from "./Navbar";
 import { useState } from "react";
-
+import axios from "axios";
 
 function App() {
   const [fileContent, setFileContent] = useState("");
+  const [consolita, setConsola] = useState("");
 
   function handleFileUpload(content) {
     setFileContent(content);
@@ -33,11 +35,30 @@ function App() {
     handleSaveFile(fileContent);
   }
 
-  function handlePrintConsole() {
-    console.log(fileContent);
-  }
+  const interpretar = async () => {
+    console.log("Ejecutando...");
+    try {
+      setConsola("Ejecutando...");
 
-
+      if (fileContent === "") {
+        setConsola("Error: No hay codigo para ejecutar");
+        console.log("Error: No hay codigo para ejecutar");
+      } else {
+        console.log(fileContent);
+        const response = await axios.post(
+          "http://localhost:5000/interprete/interpretar",
+          { code: fileContent }
+        );
+        console.log(response.data);
+        const { consola, errores } = response.data;
+        console.log(consola);
+        setConsola(consola);
+      }
+    } catch (error) {
+      console.log(error);
+      setConsola("Error en el servidor");
+    }
+  };
 
   return (
     <div className="h-screen bg-gray-800">
@@ -45,31 +66,18 @@ function App() {
         onCreateNewFile={handleCreateNewFile}
         onFileUpload={handleFileUpload}
         onSaveFile={handleSaveButtonClick}
-        onPrintConsole={handlePrintConsole}
+        onPrintConsole={interpretar}
       />
       <div className="grid grid-cols-2 bg-gray-800 p-5 py-0 gap-5">
         <div className="inline-block py-3 px-2 text-sm text-gray-500 ">
           <h1>Codigo: </h1>
-          <CodeMirror
-            className="scrollbar-track-gray-300 scrollbar-thumb-gray-500 scrollbar-thin rounded-md"
-            height="590px"
-            value={fileContent}
-            theme="dark"
-            onChange={setFileContent}
-          />
+          <CodeEditor input = {setFileContent}/>
         </div>
         <div className="inline-block py-3 px-2 text-sm text-gray-500 ">
           <h1>Consola: </h1>
-          <CodeMirror
-            readOnly="true"
-            className="scrollbar-track-gray-300 scrollbar-thumb-gray-500 scrollbar-thin rounded-md"
-            height="590px"
-            value=">"
-            theme="dark"
-          />
+          <Consola consola={consolita}/>
         </div>
       </div>
-      
     </div>
   );
 }
