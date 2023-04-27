@@ -2,12 +2,14 @@ import React from "react";
 import CodeEditor from "./CodeEditor";
 import Consola from "./Consola";
 import Example from "./Navbar";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
+import { GraphContext } from './GraphContext';
 
 function App() {
   const [fileContent, setFileContent] = useState("");
   const [consolita, setConsola] = useState("");
+  const { setGraphCode } = useContext(GraphContext);
 
   function handleFileUpload(content) {
     setFileContent(content);
@@ -50,8 +52,10 @@ function App() {
           { code: fileContent }
         );
         console.log(response.data);
-        const { consola, errores } = response.data;
+        const { consola, errores, ast } = response.data;
         console.log(consola);
+        console.log("ast: ", ast);
+        setGraphCode(ast);
         setConsola(consola);
       }
     } catch (error) {

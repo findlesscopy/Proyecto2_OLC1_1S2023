@@ -9,14 +9,17 @@ import Simbolos from "./Simbolos";
 import "./index.css";
 
 import { BrowserRouter } from "react-router-dom";
+import { GraphProvider } from "./GraphContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
-    <Routes>
+  <GraphProvider>
+    <BrowserRouter>
+      <Routes>
         <Route path="/" element={<App />} />
         <Route path="/errores" element={<Errores />} />
-        <Route path="/ast" element={<AST />} />
+        <Route path="/ast" element={<AST dot={``} />} />
         <Route path="/simbolos" element={<Simbolos />} />
       </Routes>
-  </BrowserRouter>
+    </BrowserRouter>
+  </GraphProvider>
 );

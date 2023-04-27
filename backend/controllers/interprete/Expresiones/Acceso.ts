@@ -16,4 +16,7 @@ export class Acceso extends Expresion{
             return {value: null, type: Type.NULL};
         }
     }
+    public drawAst(): { rama: string; nodo: string; } {
+        return {rama: "node", nodo: ""};
+    }
 }

@@ -8,4 +8,6 @@ export abstract class Instruccion{
     }
 
     public abstract execute(env:Entorno): any;
+
+    public abstract drawAst(): {rama: string, nodo:string};
 }

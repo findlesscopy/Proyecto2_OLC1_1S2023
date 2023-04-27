@@ -4,7 +4,7 @@ import CodeMirror from "@uiw/react-codemirror";
 function CodeEditor(props) {
 
   const onChange = React.useCallback((value, viewUpdate) => {
-    console.log('value:', value);
+    //console.log('value:', value);
     props.input(value)
   }, []);
 

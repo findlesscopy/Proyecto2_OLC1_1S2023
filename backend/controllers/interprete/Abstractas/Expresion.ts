@@ -9,4 +9,6 @@ export abstract class Expresion{
     }
 
     public abstract execute(env:Entorno): Return;
+
+    public abstract drawAst(): {rama: string, nodo:string};
 }

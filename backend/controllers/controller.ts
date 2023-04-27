@@ -19,13 +19,22 @@ class Controller{
             try{
                 printList.splice(0, printList.length);
 
-                const entornoGlobal = new Entorno(null,"Global");
+                const entornoGlobal = new Entorno(null);
 
                 for(const inst of ast){
                     inst.execute(entornoGlobal);
                 }
+                
+                let drawAst = `digraph astgraph {\n nodoPrincipal[label="AST"];\n`
 
-                res.json({consola:printList.join("\n"), errores: "ninguno"})
+                for(const inst of ast){
+                    let codigoRama = inst.drawAst();
+                    drawAst += `${codigoRama.rama}\n`;
+                    drawAst += `nodoPrincipal -> ${codigoRama.nodo};\n`
+                }
+
+                drawAst += `}`
+                res.json({consola:printList.join("\n"), errores: "ninguno", ast: drawAst})
 
             }catch(error){
                 console.log("errores: ",error);

@@ -2,11 +2,12 @@
 %lex
 
 %options case-insensitive
-%x string
+%x string 
+%x COMMENT
 
 %%
-
-
+(\/\/).*                             {}     // comentario linea
+[/][*][^*]*[*]+([^/*][^*]*[*]+)*[/]  {}     // comentario multilinea
 ///Simbolos del lenguaje
 ";"                 return 'PUNTOYCOMA';
 "{"                 return 'LLAVEIZQ';
@@ -16,6 +17,7 @@
 "["                 return 'CORCHETEIZQ'; 
 "]"                 return 'CORCHETEDER'; 
 "."                 return 'PUNTO'; 
+","                 return 'COMA';
 
 //Operaciones aritmeticaas
 "+"                 return 'MAS'; 
@@ -84,8 +86,7 @@
 /* Espacios en blanco */
 [ \r\t]+            {}                      // espacio en blanco
 \n                  {}                      // salto
-(\/\/).*                             {}     // comentario linea
-[/][*][^*]*[*]+([^/*][^*]*[*]+)*[/]  {}     // comentario multilinea
+
 
 [a-zA-Z][a-zA-Z0-9_]*   return 'ID';
 [0-9]+("."[0-9]+)\b     return 'DECIMAL';
@@ -100,12 +101,11 @@
 <string>"\\\'"                  {cadena+="\'";}
 <string>["]                     {yytext=cadena; this.popState(); return 'CADENA';}
 
-//\"[^\"]*\"				{ yytext = yytext.substr(1,yyleng-2); 	return 'CADENA'; }
-
 
 <<EOF>>                 return 'EOF';
 
 .                       { console.error('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column);}
+
 /lex
 
 %{
@@ -121,11 +121,17 @@
   const {TipoRelacional} = require('./Utils/TipoRelacional');
   const {Logicos} = require('./Expresiones/Logicos');
   const {TipoLogicos} = require('./Utils/TipoLogicos');
+  const {Ternario} = require('./Expresiones/Ternario');
+  const {Statement} = require('./Instrucciones/Statement');
+  const {Funcion} = require('./Instrucciones/Funcion');
+  const {Parametros} = require('./Expresiones/Parametros');
+  const {LlamadaFuncion} = require('./Expresiones/LlamadaFuncion');
 
 %}
 
 
 // PRECEDENCIA DE OPERADORES
+%left 'TERNARIO' 'DOSPUNTOS' 
 %left 'OR'
 %left 'AND' 
 %right 'NOT'
@@ -134,6 +140,8 @@
 %left 'POR' 'DIVIDIDO' 'MODULO'
 %left 'POTENCIA'
 %right 'UMENOS '
+
+
 
 %start INICIO
 
@@ -151,17 +159,73 @@ INSTRUCCIONES
 INSTRUCCION
 	: DEFPRINT          { $$ = $1; }
   | DECLARAR          { $$ = $1; }
-  | REDECLARAR        { $$ = $1; }
+  | FUNCION           { $$ = $1; }
+  | LLAMADAFUNCION    { $$ = $1; }
 	| error PUNTOYCOMA
   {   console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 ;
+
+// GRAMATICA IMPRIMIR 
+DEFPRINT
+    : PRINT PARENTESISIZQ EXPRESION PARENTESISDER PUNTOYCOMA  { $$ = new Print(@1.first_line, @1.first_column,$3); }
+;
+
+//Gramatica declarar
+DECLARAR
+  : TIPO ID PUNTOYCOMA { $$ = new Declarar($2, $1, null, @1.first_line, @1.first_column );}
+  | TIPO ID IGUAL EXPRESION PUNTOYCOMA { $$ = new Declarar($2, $1, $4, @1.first_line, @1.first_column );}
+;
+
+//GRAMÁTICA FUNCION
+FUNCION
+  : TIPO ID PARENTESISIZQ PARENTESISDER STATEMENT { $$ = new Funcion($1, $2, [],$5,@1.first_line, @1.first_column)}
+  | TIPO ID PARENTESISIZQ PARAMETROS PARENTESISDER STATEMENT  { $$ = new Funcion($1, $2, $4,$6,@1.first_line, @1.first_column)}
+;
+//GRAMATICA STATEMENT
+STATEMENT
+  : LLAVEIZQ INSTRUCCIONES LLAVEDER { $$ = new Statement($2,@1.first_line, @1.first_column) }
+;
+
+PARAMETROS
+  : PARAMETROS COMA PARAMETRO { $1.push($3); $$ = $1;}
+  | PARAMETRO                 { $$ = [$1];}
+;
+
+PARAMETRO
+  : TIPO ID { $$ = new Parametros($1, $2, @1.first_line, @1.first_column); }
+;
+
 EXPRESION
   : PRIMITIVO       { $$ = $1; }
   | ACCEDERVAR      { $$ = $1; }
   | ARITMETICA      { $$ = $1; }
   | RELACIONALES    { $$ = $1; }
   | LOGICOS         { $$ = $1; }
-  | CREMENTOS       { $$ = $1; }
+  | PARENTESISIZQ EXPRESION PARENTESISDER { $$ = $2; }
+;
+
+//Llamada a función
+LLAMADAFUNCION 
+  : ID PARENTESISIZQ PARENTESISDER PUNTOYCOMA { $$ = new LlamadaFuncion($1,[],@1.first_line, @1.first_column)}
+  | ID PARENTESISIZQ ARGUMENTOS PARENTESISDER PUNTOYCOMA { $$ = new LlamadaFuncion($1,$3,@1.first_line, @1.first_column)}
+;
+
+ARGUMENTOS
+  : ARGUMENTOS COMA EXPRESION { $1.push($3); $$ = $1;}
+  | EXPRESION                 { $$ = [$1];}
+;
+
+//GRAMÁTICA TERNARIOS
+
+//GRAMATICA ARITMETICA
+ARITMETICA
+  : EXPRESION MAS EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.SUMA, @1.first_line, @1.first_column); }
+  | EXPRESION MENOS EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.RESTA, @1.first_line, @1.first_column); }
+  | EXPRESION POR EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.MULTIPLICACION, @1.first_line, @1.first_column); }
+  | EXPRESION DIVIDIDO EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.DIVISION, @1.first_line, @1.first_column); }
+  | EXPRESION MODULO EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.MODULO, @1.first_line, @1.first_column); }
+  | EXPRESION POTENCIA EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.POTENCIA, @1.first_line, @1.first_column); }
+  | MENOS EXPRESION %prec UMENOS { $$ = new Aritmetica($2, $2, TipoOperacion.MENOSUNARIO, @1.first_line, @1.first_column); }
 ;
 
 //GRAMÁTICA LOGICOS
@@ -180,58 +244,10 @@ RELACIONALES
   | EXPRESION MAYOR EXPRESION { $$ = new Relacionales($1, $3, TipoRelacional.MAYOR, @1.first_line, @1.first_column); }
   | EXPRESION MAYORIGUAL EXPRESION { $$ = new Relacionales($1, $3, TipoRelacional.MAYORIGUAL, @1.first_line, @1.first_column); }
 ;  
-//GRAMATICA ARITMETICA
-ARITMETICA
-  : EXPRESION MAS EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.SUMA, @1.first_line, @1.first_column); }
-  | EXPRESION MENOS EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.RESTA, @1.first_line, @1.first_column); }
-  | EXPRESION POR EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.MULTIPLICACION, @1.first_line, @1.first_column); }
-  | EXPRESION DIVIDIDO EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.DIVISION, @1.first_line, @1.first_column); }
-  | EXPRESION MODULO EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.MODULO, @1.first_line, @1.first_column); }
-  | EXPRESION POTENCIA EXPRESION { $$ = new Aritmetica($1, $3, TipoOperacion.POTENCIA, @1.first_line, @1.first_column); }
-  | MENOS EXPRESION %prec UMENOS { $$ = new Aritmetica($2, $2, TipoOperacion.MENOSUNARIO, @1.first_line, @1.first_column); }
-;
+
 //GRAMÁTICA ACCESO DE VARIABLES
 ACCEDERVAR
   : ID  { $$ = new Acceso($1, @1.first_line, @1.first_column); }
-;
-// GRAMATICA IMPRIMIR 
-DEFPRINT
-    : PRINT PARENTESISIZQ EXPRESION PARENTESISDER PUNTOYCOMA  { $$ = new Print(@1.first_line, @1.first_column,$3); }
-;
-//Gramatica declarar
-DECLARAR
-  : TIPO ID PUNTOYCOMA { $$ = new Declarar($2, $1, null, @1.first_line, @1.first_column );}
-  | TIPO ID IGUAL EXPRESION PUNTOYCOMA { $$ = new Declarar($2, $1, $4, @1.first_line, @1.first_column );}
-;
-//Gramatica redeclarar
-REDECLARAR
-  : ID IGUAL EXPRESION PUNTOYCOMA
-;
-
-//Gramatica Casteos
-CASTEOS
-  : PARENTESISIZQ TIPO PARENTESISDER EXPRESION
-;
-
-TIPO
-  : INT { $$ = Type.INT; }
-  | STRING { $$ = Type.STRING; }
-  | CHAR { $$ = Type.CHAR; }
-  | DOUBLE { $$ = Type.DOUBLE; }
-  | BOOLEAN { $$ = Type.BOOLEAN; }
-;
-
-//Gramática de Incremento y decremento
-CREMENTOS
-  : ID INCREMENTO PUNTOYCOMA
-  | ID DECREMENTO PUNTOYCOMA
-;
-
-//Gramática de Estructuras de datos
-//Vectores
-VECTORES
-  : TIPO CORCHETEIZQ CORCHETEDER ID IGUAL NEW TIPO CORCHETEIZQ EXPRESION CORCHETEDER PUNTOYCOMA
-  | TIPO CORCHETEIZQ CORCHETEDER ID IGUAL LLAVEIZQ EXPRESION LLAVEDER PUNTOYCOMA
 ;
 
 PRIMITIVO
@@ -241,4 +257,12 @@ PRIMITIVO
   | CARACTER        { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.CHAR); }
   | TRUE            { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.BOOLEAN); }
   | FALSE           { $$ = new Primitivo(@1.first_line, @1.first_column,$1,Type.BOOLEAN); }
+;
+
+TIPO
+  : INT { $$ = Type.INT; }
+  | STRING { $$ = Type.STRING; }
+  | CHAR { $$ = Type.CHAR; }
+  | DOUBLE { $$ = Type.DOUBLE; }
+  | BOOLEAN { $$ = Type.BOOLEAN; }
 ;
