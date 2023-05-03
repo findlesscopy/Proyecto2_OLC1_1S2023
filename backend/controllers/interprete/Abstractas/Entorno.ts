@@ -3,10 +3,12 @@ import { Type } from "./Return";
 import { printList } from "../Reportes/Printlist";
 import { Funcion } from "../Instrucciones/Funcion";
 import { ListaTabla,TablaSimbolos } from "../Reportes/TablaSimbolos";
+import { Vector } from "../Expresiones/Vector";
 
 export class Entorno {
     private variables = new Map<string, Simbolo>();   //  mapa de variables
     private funciones = new Map<string, Funcion>();   //  mapa de variables
+    private vectores = new Map<string, Vector>();   //  mapa de variables
 
     // constructor
     constructor(private anterior: Entorno | null) {
@@ -29,6 +31,7 @@ export class Entorno {
       }
   
     }
+
 
     public actualizar_variable(nombre: string, valor: any) {
       let env: Entorno | null = this;
@@ -113,6 +116,7 @@ export class Entorno {
     return env;
   }
 
+ 
   
 }
   

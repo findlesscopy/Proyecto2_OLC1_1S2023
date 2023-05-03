@@ -162,6 +162,11 @@
   const {Round} = require('./Expresiones/Round');
   const {Typeof} = require('./Expresiones/Typeof');
   const {toString} = require('./Expresiones/toString');
+  const {Vector} = require('./Expresiones/Vector');
+  const {LlamadaVector} = require('./Expresiones/LlamadaVector');
+  const {Listas} = require('./Expresiones/Listas');
+  const {AddListas} = require('./Expresiones/AddLista');
+  const {LlamadaLista} = require('./Expresiones/LlamadaLista');
  
 %}
 
@@ -207,10 +212,25 @@ INSTRUCCION
   | RETORNOS         { $$ = $1; }
   | CICLO_DOWHILE     { $$ = $1; }
   | CONTROL_SWITCH    { $$ = $1; }
+  | VECTORES        { $$ = $1; }
+  | LLAMADAVECTOR  { $$ = $1; }
+  | LISTAS       { $$ = $1; }
+  | ADDLISTAS   { $$ = $1; }
 	| error PUNTOYCOMA
   {   console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);}
 ;
 
+LLAMADALISTA
+  : ID CORCHETEIZQ CORCHETEIZQ EXPRESION CORCHETEDER CORCHETEDER { $$ = new LlamadaLista($1, $4, @1.first_line, @1.first_column); }
+;
+
+ADDLISTAS
+  : ID PUNTO ADD PARENTESISIZQ EXPRESION PARENTESISDER PUNTOYCOMA { $$ = new AddListas($1, $5, @1.first_line, @1.first_column); }
+;
+
+LISTAS  
+  : LIST MENOR TIPO MAYOR ID IGUAL NEW LIST MENOR TIPO MAYOR PUNTOYCOMA { $$ = new Listas($3, $5, @1.first_line, @1.first_column); }
+;
 CONTROL_SWITCH
   : SWITCH PARENTESISIZQ EXPRESION PARENTESISDER LLAVEIZQ CASELIST DEFAULT_EXP LLAVEDER { $$ = new Switch($3, $6, $7, @1.first_line, @1.first_column); }
 ;
@@ -331,9 +351,29 @@ EXPRESION
   | CASTEOS         { $$ = $1; }
   | LLAMADAFUNCION    { $$ = $1; }
   | FUNCIONES_NATIVAS { $$ = $1; }
+  | LLAMADAVECTOR_EXPRESION  { $$ = $1; }
+  | LLAMADALISTA  { $$ = $1; }
   | EXPRESION INCREMENTO_SIMBOLO { $$ = new Incremento($1, @1.first_line, @1.first_column); }
   | EXPRESION DECREMENTO_SIMBOLO { $$ = new Decremento($1, @1.first_line, @1.first_column); }
   | PARENTESISIZQ EXPRESION PARENTESISDER { $$ = $2; }
+;
+
+LLAMADAVECTOR
+  : ID CORCHETEIZQ EXPRESION CORCHETEDER PUNTOYCOMA { $$ = new LlamadaVector($1, $3, @1.first_line, @1.first_column); }
+;
+
+LLAMADAVECTOR_EXPRESION
+  : ID CORCHETEIZQ EXPRESION CORCHETEDER  { $$ = new LlamadaVector($1, $3, @1.first_line, @1.first_column); }
+;
+
+VECTORES 
+  : TIPO CORCHETEIZQ CORCHETEDER ID IGUAL NEW TIPO CORCHETEIZQ EXPRESION CORCHETEDER PUNTOYCOMA { $$ = new Vector($1,$4,$9,null,@1.first_line, @1.first_column); }
+  | TIPO CORCHETEIZQ CORCHETEDER ID IGUAL LLAVEIZQ VALORES LLAVEDER PUNTOYCOMA { $$ = new Vector($1,$4,$7.length,$7,@1.first_line, @1.first_column);}
+;
+
+VALORES
+  : VALORES COMA EXPRESION { $1.push($3); $$ = $1;}
+  | EXPRESION              { $$ = [$1];}
 ;
 
 FUNCIONES_NATIVAS

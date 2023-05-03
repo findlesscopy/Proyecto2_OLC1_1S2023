@@ -8,7 +8,9 @@ export enum Type{
     VOID = 6,
     RETURN = 7,
     BREAK = 8,
-    CONTINUE = 9
+    CONTINUE = 9,
+    VECTOR = 10,
+    LIST = 11
 }
 
 export type Return = {
