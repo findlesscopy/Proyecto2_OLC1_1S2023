@@ -6,4 +6,6 @@ router.get('/ping', controller.pong);
 
 router.post('/interpretar', controller.interpretar);
 
+router.get('/tablaSimbolos', controller.tablaSimbolos);
+
 export default router;

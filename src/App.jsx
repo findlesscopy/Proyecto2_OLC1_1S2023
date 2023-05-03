@@ -10,6 +10,7 @@ function App() {
   const [fileContent, setFileContent] = useState("");
   const [consolita, setConsola] = useState("");
   const { setGraphCode } = useContext(GraphContext);
+  let tablasimbolos = []
 
   function handleFileUpload(content) {
     setFileContent(content);
@@ -51,10 +52,15 @@ function App() {
           "http://localhost:5000/interprete/interpretar",
           { code: fileContent }
         );
-        console.log(response.data);
+        let tabla = await axios.get(
+          "http://localhost:5000/interprete/tablaSimbolos"
+        )
+        console.log(tabla.data)
+        //console.log(tabla.data)
+        //console.log(response.data);
         const { consola, errores, ast } = response.data;
-        console.log(consola);
-        console.log("ast: ", ast);
+        //console.log(consola);
+        //console.log("ast: ", ast);
         setGraphCode(ast);
         setConsola(consola);
       }
@@ -63,6 +69,10 @@ function App() {
       setConsola("Error en el servidor");
     }
   };
+
+  
+
+
 
   return (
     <div className="h-screen bg-gray-800">

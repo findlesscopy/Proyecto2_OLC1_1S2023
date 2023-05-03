@@ -2,6 +2,7 @@ import { Expresion } from "../Abstractas/Expresion";
 import { Type, Return } from "../Abstractas/Return";
 import { Entorno } from "../Abstractas/Entorno";
 import generateID from "../Utils/generadorID";
+
 export class LlamadaLista extends Expresion{
     constructor(private id:string, private index:Expresion, line:number, column:number){
         super(line,column);

@@ -3,6 +3,7 @@ import { Expresion } from "../Abstractas/Expresion";
 import { Entorno } from "../Abstractas/Entorno";
 import { printList } from "../Reportes/Printlist";
 import generateID  from "../Utils/generadorID";
+import { ListaTabla, TablaSimbolos } from "../Reportes/TablaSimbolos";
 
 export class Print extends Instruccion{
     constructor(line:number, column:number, private expresion: Expresion){
@@ -13,6 +14,7 @@ export class Print extends Instruccion{
         try{
             const value = this.expresion.execute(env);
             printList.push(value.value);
+            ListaTabla.push(new TablaSimbolos("Print", "Instruccion", env.nombreEntorno, this.line, this.column));
             console.log(value.value);
         }catch(error){
             console.log(error);

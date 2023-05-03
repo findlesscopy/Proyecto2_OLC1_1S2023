@@ -38,7 +38,6 @@ export class AddListas extends Expresion{
         ramaLista += `${nodoIDPrincipal}[label="${this.id}"];\n`;
 
         return { rama: ramaLista, nodo: nodoPrincipal };
-        
     }
 
 }

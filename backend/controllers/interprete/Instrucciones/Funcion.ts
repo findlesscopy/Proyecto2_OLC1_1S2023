@@ -3,7 +3,7 @@ import { Entorno } from "../Abstractas/Entorno";
 import { Expresion } from '../Abstractas/Expresion';
 import { Return, Type } from "../Abstractas/Return";
 import generateID from "../Utils/generadorID";
-
+import { ListaTabla, TablaSimbolos } from "../Reportes/TablaSimbolos";
 export class Funcion extends Instruccion{
 
     public return_Encontrado: boolean = false;
@@ -17,6 +17,7 @@ export class Funcion extends Instruccion{
     public execute(env: Entorno) {
         // guardar la funcion en entorno
         env.guardarFuncion(this.id,this);
+        ListaTabla.push(new TablaSimbolos(this.id, "Funcion/Método", env.nombreEntorno, this.line, this.column));
     }
     
     public drawAst(): { rama: string; nodo: string; } {

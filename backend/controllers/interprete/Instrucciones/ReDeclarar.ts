@@ -2,7 +2,7 @@ import { Instruccion } from "../Abstractas/Instruccion";
 import { Entorno } from "../Abstractas/Entorno";
 import { Expresion } from "../Abstractas/Expresion";
 import generateID  from "../Utils/generadorID";
-
+import { ListaTabla, TablaSimbolos } from "../Reportes/TablaSimbolos";
 export class ReDeclarar extends Instruccion{
     constructor(private id: string, private valor: Expresion | null, linea: number, columna: number){
         super(linea, columna);
@@ -14,6 +14,7 @@ export class ReDeclarar extends Instruccion{
         if(this.valor != null){
             const val = this.valor.execute(env);
             env.actualizar_variable(this.id, val.value)
+            ListaTabla.push(new TablaSimbolos(this.id, "ReDeclarar", env.nombreEntorno, this.line, this.column));
         }
 
     }

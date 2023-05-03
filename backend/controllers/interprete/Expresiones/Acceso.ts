@@ -3,6 +3,7 @@ import { Return, Type } from "../Abstractas/Return";
 import { Entorno } from "../Abstractas/Entorno";
 import { printList } from "../Reportes/Printlist";
 import generateID  from "../Utils/generadorID";
+import { ListaTabla, TablaSimbolos } from "../Reportes/TablaSimbolos";
 export class Acceso extends Expresion{
     constructor(private id:string, line:number, column:number){
         super(line, column);
@@ -12,7 +13,9 @@ export class Acceso extends Expresion{
         const value = env.getVar(this.id);
 
         if(value){
+            ListaTabla.push(new TablaSimbolos(this.id,"Acceso", env.nombreEntorno, this.line, this.column));
             return {value: value.valor, type: value.tipo};
+            
         }else{
             return {value: null, type: Type.NULL};
         }

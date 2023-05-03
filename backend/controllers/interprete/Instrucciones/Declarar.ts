@@ -3,6 +3,7 @@ import { Entorno } from "../Abstractas/Entorno";
 import { Expresion } from "../Abstractas/Expresion";
 import { Type } from "../Abstractas/Return";
 import generateID  from "../Utils/generadorID";
+import { ListaTabla, TablaSimbolos } from "../Reportes/TablaSimbolos";
 export class Declarar extends Instruccion{
     private id: string;
     private tipo: Type;
@@ -19,14 +20,18 @@ export class Declarar extends Instruccion{
         if(this.valor != null){
             const val = this.valor.execute(env);
             env.guardar(this.id, val.value, this.tipo, this.line, this.column);
+            ListaTabla.push(new TablaSimbolos(this.id, "Declarar", env.nombreEntorno, this.line, this.column));
         }else{
+            ListaTabla.push(new TablaSimbolos(this.id, "Declarar", env.nombreEntorno, this.line, this.column));
             env.guardar(this.id, null, this.tipo, this.line, this.column)
         }
 
         if(this.id == null && this.valor != null){
             const val = this.valor.execute(env);
             env.actualizar_variable(this.id, val.value)
+            ListaTabla.push(new TablaSimbolos(this.id, "Declarar", env.nombreEntorno, this.line, this.column));
         }
+        //ListaTabla.push(new TablaSimbolos(this.id, "Declarar", env.nombreEntorno, this.line, this.column));
     }
 
     public drawAst(): { rama: string; nodo: string; } {

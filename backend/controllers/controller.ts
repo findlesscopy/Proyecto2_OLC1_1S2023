@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { printList } from "./interprete/Reportes/Printlist";
 import { Entorno } from "./interprete/Abstractas/Entorno";
+import { ListaTabla } from './interprete/Reportes/TablaSimbolos';
 class Controller{
     
     public pong(req: Request, res: Response){
@@ -19,7 +20,7 @@ class Controller{
             try{
                 printList.splice(0, printList.length);
 
-                const entornoGlobal = new Entorno(null);
+                const entornoGlobal = new Entorno(null, "Global");
 
                 for(const inst of ast){
                     inst.execute(entornoGlobal);
@@ -51,6 +52,11 @@ class Controller{
                 errores: err
             })
         }
+    }
+
+    public tablaSimbolos(req: Request, res: Response){
+        res.json(ListaTabla);
+        ListaTabla.splice(0, ListaTabla.length);
     }
 }
 

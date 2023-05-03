@@ -24,7 +24,7 @@ export class Statement extends Instruccion {
     }
 
     public execute(env: Entorno) {
-        const newEnv = new Entorno(env);
+        const newEnv = new Entorno(env, "Statement");
 
         for(const instrucciones of this.body){
             try{

@@ -16,7 +16,7 @@ export class LlamadaFuncion extends Expresion {
     const funcion = env.getFuncion(this.id);
 
     if (funcion != null) {
-      const envFun = new Entorno(env.getGlobal());
+      const envFun = new Entorno(env.getGlobal(), this.id);
 
       if (funcion.parametros.length == this.argumentos.length) {
         for (let i = 0; i < funcion.parametros.length; i++) {

@@ -9,9 +9,9 @@ export class Entorno {
     private variables = new Map<string, Simbolo>();   //  mapa de variables
     private funciones = new Map<string, Funcion>();   //  mapa de variables
     private vectores = new Map<string, Vector>();   //  mapa de variables
-
+    public nombre = "";
     // constructor
-    constructor(private anterior: Entorno | null) {
+    constructor(private anterior: Entorno | null, public nombreEntorno: string) {
       this.variables = new Map<string, Simbolo>();
       
     }

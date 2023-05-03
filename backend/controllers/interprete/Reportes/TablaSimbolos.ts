@@ -9,3 +9,7 @@ export class TablaSimbolos{
 }
 
 export let ListaTabla:Array<TablaSimbolos> = []
+
+export function limpiarTabla(){
+    ListaTabla.splice(0, ListaTabla.length);
+}
