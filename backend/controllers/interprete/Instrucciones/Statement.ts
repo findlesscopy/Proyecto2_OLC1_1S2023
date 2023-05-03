@@ -9,6 +9,7 @@ import { For } from "./For";
 import { While } from "./While";
 //import { DoWhile } from "./DoWhile";
 import { Funcion } from "./Funcion";
+import generateID from "../Utils/generadorID";
 export class Statement extends Instruccion {
     
     public recorridoAmbito: string = "";
@@ -42,6 +43,22 @@ export class Statement extends Instruccion {
     }
 
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoStatement${id.toString()}`;
+        const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+        let ramaStatement = `${nodoPrincipal}[label="Statement"];\n`
+
+        for(const instrucciones of this.body){
+
+            const codigoAST:{rama:string, nodo:string} = instrucciones.drawAst();
+
+            ramaStatement += codigoAST.rama + "\n"
+
+            ramaStatement += `${nodoPrincipal} -> ${codigoAST.nodo};\n`
+        }
+
+        return {rama: ramaStatement, nodo: nodoPrincipal};
     }
 }

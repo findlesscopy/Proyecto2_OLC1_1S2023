@@ -1,7 +1,7 @@
 import { Expresion } from "../Abstractas/Expresion";
 import { Return, Type } from "../Abstractas/Return";
 import { Entorno } from "../Abstractas/Entorno";
-
+import generateID from "../Utils/generadorID";
 export class Parametros extends Expresion {
   constructor(
     private tipo: Type,
@@ -17,6 +17,16 @@ export class Parametros extends Expresion {
     return { value: this.id, type: this.tipo };
   }
   public drawAst(): { rama: string; nodo: string } {
-    return { rama: "node", nodo: "" };
+    const id = generateID(15);
+
+    const nodoPrincipal = `nodoParametro${id.toString()}`;
+    const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+    let ramaParametro = `${nodoPrincipal}[label="Parametro"];\n`;
+
+    ramaParametro += `${nodoPrincipal} -> ${nodoIDPrincipal};\n`;
+    ramaParametro += `${nodoIDPrincipal}[label="${this.id}"];\n`;
+
+    return { rama: ramaParametro, nodo: nodoPrincipal };
   }
 }

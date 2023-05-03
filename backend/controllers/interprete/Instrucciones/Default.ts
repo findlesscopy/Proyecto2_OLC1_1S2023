@@ -3,7 +3,7 @@ import { Entorno } from "../Abstractas/Entorno";
 import { Return, Type } from "../Abstractas/Return";
 import { Instruccion } from "../Abstractas/Instruccion";
 import { Statement } from "./Statement";
-
+import generateID from "../Utils/generadorID";
 export class Default extends Instruccion {
   public return_Encontrado: boolean = false;
   public valor_Return: Return = { value: null, type: Type.VOID };
@@ -22,6 +22,22 @@ export class Default extends Instruccion {
   }
 
   public drawAst(): { rama: string; nodo: string } {
-    return { rama: "node", nodo: "" };
+    const id = generateID(15);
+
+    const nodoPrincipal = `nodoDefault${id.toString()}`;
+    const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+    let ramaDefault = `${nodoPrincipal}[label="Default"];\n`;
+
+    if (this.lista_instrucciones != null) {
+      const codigoAST2: { rama: string; nodo: string } =
+        this.lista_instrucciones.drawAst();
+
+      ramaDefault += codigoAST2.rama + "\n";
+
+      ramaDefault += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`;
+    }
+
+    return { rama: ramaDefault, nodo: nodoPrincipal };
   }
 }

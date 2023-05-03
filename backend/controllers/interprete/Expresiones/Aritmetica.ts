@@ -10,6 +10,8 @@ import {
   TablaMultiplicacion,
   TablaPotencia,
 } from "../Utils/MatrizDominante";
+import { printList } from "../Reportes/Printlist";
+import generateID  from "../Utils/generadorID";
 
 export class Aritmetica extends Expresion {
   constructor(
@@ -198,6 +200,30 @@ export class Aritmetica extends Expresion {
   }
 
   public drawAst(): { rama: string; nodo: string } {
-    return { rama: "node", nodo: "" };
+    const id = generateID(15)
+    
+    const nodoPrincipal = `node${id}`;
+    const nodoOperador = `node${generateID(15)}`;
+    const nodoIzquierdo = `node${generateID(15)}`;
+    const nodoDerecho = `node${generateID(15)}`;
+
+    const ramaIzquierda = this.izquierdo.drawAst();
+    const ramaDerecha = this.derecha.drawAst();
+
+    const rama = `node${id} [label="Operacion", fillcolor="LightBlue", style ="filled", shape="box"]; \n`;
+    const rama2 = `${nodoOperador} [label="${this.operador}", fillcolor="LightBlue", style ="filled", shape="box"]; \n`;
+
+    const rama3 = `${ramaIzquierda.rama} \n`;
+    const rama4 = `${ramaDerecha.rama} \n`;
+
+    const rama5 = `${nodoPrincipal} -> ${nodoOperador} \n`;
+
+    const rama6 = `${nodoOperador} -> ${ramaIzquierda.nodo} \n`;
+    const rama7 = `${nodoOperador} -> ${ramaDerecha.nodo} \n`;
+
+    return {
+      rama: rama + rama2 + rama3 + rama4 + rama5 + rama6 + rama7,
+      nodo: nodoPrincipal,
+    };
   }
 }

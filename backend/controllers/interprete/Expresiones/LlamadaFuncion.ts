@@ -1,6 +1,7 @@
 import { Expresion } from "../Abstractas/Expresion";
 import { Entorno } from "../Abstractas/Entorno";
 import { Type } from "../Abstractas/Return";
+import generateID from "../Utils/generadorID";
 export class LlamadaFuncion extends Expresion {
   constructor(
     private id: string,
@@ -66,6 +67,27 @@ export class LlamadaFuncion extends Expresion {
     }
   }
   public drawAst(): { rama: string; nodo: string } {
-    return { rama: "node", nodo: "" };
+    const id = generateID(15);
+
+    const nodoPrincipal = `nodoLlamadaFuncion${id.toString()}`;
+    const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+    let ramaLlamadaFuncion = `${nodoPrincipal}[label="LlamadaFuncion"];\n`;
+
+    ramaLlamadaFuncion += `${nodoIDPrincipal}[label="${this.id}"];\n`;
+
+    ramaLlamadaFuncion += `${nodoPrincipal} -> ${nodoIDPrincipal};\n`;
+
+    if (this.argumentos != null) {
+      for (let i = 0; i < this.argumentos.length; i++) {
+        const codigoAST2: { rama: string; nodo: string } = this.argumentos[
+          i
+        ].drawAst();
+        ramaLlamadaFuncion += codigoAST2.rama + "\n";
+        ramaLlamadaFuncion += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`;
+      }
+    }
+
+    return { rama: ramaLlamadaFuncion, nodo: nodoPrincipal };
   }
 }

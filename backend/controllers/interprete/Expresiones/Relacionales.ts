@@ -2,7 +2,7 @@ import { Expresion } from "../Abstractas/Expresion";
 import { Return, Type } from "../Abstractas/Return";
 import { Entorno } from "../Abstractas/Entorno";
 import { TipoRelacional } from "../Utils/TipoRelacional";
-
+import generateID  from "../Utils/generadorID";
 export class Relacionales extends Expresion {
   constructor(
     private izq: Expresion,
@@ -206,6 +206,23 @@ export class Relacionales extends Expresion {
   }
 
   public drawAst(): { rama: string; nodo: string } {
-    return { rama: "node", nodo: "" };
+    const id = generateID(15);
+
+    const nodoPrincipal = `node${id}`
+    const nodoOperador = `node${generateID(15)}`
+
+    const ramaIzquierda = this.izq.drawAst();
+    const ramaDerecha = this.der.drawAst();
+
+    const rama = `node${id} [label="Relacional", fillcolor="LightBlue", style ="filled", shape="box"]\n`
+      + `${ramaIzquierda.rama}${ramaDerecha.rama}`
+      + `${nodoOperador} -> ${ramaIzquierda.nodo}\n`
+      + `${nodoPrincipal} -> ${nodoOperador}\n`
+      + `${nodoOperador} -> ${ramaDerecha.nodo}\n`
+      + `${nodoOperador} [label="${this.operador}", shape="box"]\n`
+
+    return { rama, nodo: nodoPrincipal }
+
+
   }
 }

@@ -1,7 +1,7 @@
 import { Entorno } from "../Abstractas/Entorno";
 import { Type } from "../Abstractas/Return";
 import { Instruccion } from "../Abstractas/Instruccion";
-
+import generateID  from "../Utils/generadorID";
 export class IncrementoIns extends Instruccion{
     constructor(
         private nombre: string,
@@ -24,6 +24,17 @@ export class IncrementoIns extends Instruccion{
         }
     }
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoIncremento${id.toString()}`;
+        const nodoExpresion = `nodoExpresion${id.toString()}`;
+
+        let ramaIncremento = `${nodoPrincipal}[label="Incremento"];\n`;
+        ramaIncremento += `${nodoExpresion}[label="Expresion"];\n`;
+
+        ramaIncremento += `${nodoPrincipal} -> ${nodoExpresion};\n`;
+
+        return {rama: ramaIncremento, nodo: nodoPrincipal};
+        
     }
 } 

@@ -1,6 +1,7 @@
 import { Expresion } from "../Abstractas/Expresion";
 import { Entorno } from "../Abstractas/Entorno";
 import { Return, Type } from "../Abstractas/Return";
+import generateID  from "../Utils/generadorID";
 
 export class Casteo extends Expresion {
   constructor(
@@ -53,6 +54,26 @@ export class Casteo extends Expresion {
   }
 
   public drawAst(): { rama: string; nodo: string } {
-    return { rama: "node", nodo: "" };
+    const id = generateID(15);
+
+    const nodoPrincipal = `nodoCasteo${id.toString()}`;
+    const nodoTipo = `nodoTipo${id.toString()}`;
+    const nodoExpresion = `nodoExpresion${id.toString()}`;
+
+    const ramaCasteo = `${nodoPrincipal}[label="Casteo"];\n`;
+
+    const ramaTipo = `${nodoTipo}[label="${this.tipo}"];\n`;
+
+    const ramaExpresion = this.expresion.drawAst();
+
+    const ramaPrincipal = `${nodoPrincipal} -> ${nodoTipo};\n`;
+    const ramaPrincipal2 = `${nodoTipo} -> ${ramaExpresion.nodo};\n`;
+
+    return {
+      rama: ramaCasteo + ramaTipo + ramaExpresion.rama + ramaPrincipal + ramaPrincipal2,
+      nodo: nodoPrincipal,
+    };
+
+    
   }
 }

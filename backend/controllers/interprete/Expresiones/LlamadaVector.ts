@@ -3,11 +3,12 @@ import { Type, Return } from "../Abstractas/Return";
 import { Entorno } from "../Abstractas/Entorno";
 
 export class LlamadaVector extends Expresion{
-    constructor(private id: string, private index: Expresion, line: number, column: number){
+    constructor(private id: string, private index: Expresion | null, line: number, column: number){
         super(line,column);
     }
 
     public execute(env: Entorno): Return {
+        if(this.index == null) throw {error: "El indice no puede ser nulo", linea: this.line, columna: this.column}
         const index = this.index.execute(env);
         const vector = env.getVar(this.id);
         if(vector == null){

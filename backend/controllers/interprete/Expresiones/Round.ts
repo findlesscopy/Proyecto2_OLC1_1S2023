@@ -1,7 +1,7 @@
 import { Expresion } from "../Abstractas/Expresion";
 import { Entorno } from "../Abstractas/Entorno";
 import { Return, Type } from "../Abstractas/Return";
-
+import generateID from "../Utils/generadorID";
 export class Round extends Expresion{
     constructor(private expresion:Expresion, line:number, column:number){
         super(line,column);
@@ -22,6 +22,19 @@ export class Round extends Expresion{
     }
 
     public drawAst(): { rama: string; nodo: string } {
-        return { rama: "node", nodo: "" };
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoRound${id.toString()}`;
+
+        let ramaRound = `${nodoPrincipal}[label="Round"];\n`;
+
+        let {rama, nodo} = this.expresion.drawAst();
+
+        ramaRound += rama;
+
+        ramaRound += `${nodoPrincipal} -> ${nodo};\n`;
+
+        return { rama: ramaRound, nodo: nodoPrincipal };
+
     }
 }

@@ -15,7 +15,10 @@ export class Length extends Expresion{
         }else{
             if(exp.type == Type.STRING){
                 return {value: exp.value.length, type: Type.INT};
-            }else{
+            }else if(exp.type == Type.VECTOR){
+                return {value: exp.value.length, type: Type.INT};
+            }
+            else{
                 return {value: null, type: Type.NULL};
             }
         }

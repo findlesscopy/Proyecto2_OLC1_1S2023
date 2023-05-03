@@ -1,7 +1,7 @@
 import { Expresion } from "../Abstractas/Expresion";
 import { Type, Return } from "../Abstractas/Return";
 import { Entorno } from "../Abstractas/Entorno";
-
+import generateID from "../Utils/generadorID";
 export class AddListas extends Expresion{
     constructor(private id:string, private valor:Expresion, line:number, column:number){
         super(line,column);
@@ -27,7 +27,18 @@ export class AddListas extends Expresion{
     }
 
     public drawAst(): { rama: string; nodo: string } {
-        return { rama: "node", nodo: "" };
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoLista${id.toString()}`;
+        const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+        let ramaLista = `${nodoPrincipal}[label="Lista"];\n`;
+
+        ramaLista += `${nodoPrincipal} -> ${nodoIDPrincipal};\n`;
+        ramaLista += `${nodoIDPrincipal}[label="${this.id}"];\n`;
+
+        return { rama: ramaLista, nodo: nodoPrincipal };
+        
     }
 
 }

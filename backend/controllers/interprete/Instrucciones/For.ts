@@ -3,7 +3,7 @@ import { Entorno } from "../Abstractas/Entorno";
 import { Return, Type } from "../Abstractas/Return";
 import { Instruccion } from "../Abstractas/Instruccion";    
 import { Statement } from "./Statement";
-
+import generateID from "../Utils/generadorID";
 export class For extends Instruccion{
 
     public return_Encontrado: boolean = false;
@@ -41,6 +41,38 @@ export class For extends Instruccion{
     }
 
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoFor${id.toString()}`;
+        const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+        const codigoAST:{rama:string, nodo:string} = this.variable.drawAst();
+        let ramaFor = `${nodoPrincipal}[label="For"];\n`
+
+        ramaFor += codigoAST.rama + "\n"
+
+        ramaFor += `${nodoPrincipal} -> ${codigoAST.nodo};\n`
+
+        const codigoAST2:{rama:string, nodo:string} = this.condicion.drawAst();
+
+        ramaFor += codigoAST2.rama + "\n"
+
+        ramaFor += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`
+
+        const codigoAST3:{rama:string, nodo:string} = this.iteracion.drawAst();
+
+        ramaFor += codigoAST3.rama + "\n"
+
+        ramaFor += `${nodoPrincipal} -> ${codigoAST3.nodo};\n`
+
+        const codigoAST4:{rama:string, nodo:string} = this.instrucciones.drawAst();
+
+        ramaFor += codigoAST4.rama + "\n"
+
+        ramaFor += `${nodoPrincipal} -> ${codigoAST4.nodo};\n`
+
+        return {rama: ramaFor, nodo: nodoPrincipal};
+
+        
     }
 }

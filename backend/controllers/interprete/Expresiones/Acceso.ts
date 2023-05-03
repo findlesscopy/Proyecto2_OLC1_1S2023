@@ -1,7 +1,8 @@
 import { Expresion } from "../Abstractas/Expresion";
 import { Return, Type } from "../Abstractas/Return";
 import { Entorno } from "../Abstractas/Entorno";
-
+import { printList } from "../Reportes/Printlist";
+import generateID  from "../Utils/generadorID";
 export class Acceso extends Expresion{
     constructor(private id:string, line:number, column:number){
         super(line, column);
@@ -17,6 +18,18 @@ export class Acceso extends Expresion{
         }
     }
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoAcceso${id.toString()}`;
+        const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+        let ramaAcceso = `${nodoPrincipal}[label="Acceso"];\n`
+
+        ramaAcceso += `${nodoIDPrincipal}[label="${this.id.toString()}"];\n`;
+
+        ramaAcceso += `${nodoPrincipal} -> ${nodoIDPrincipal};\n`
+
+        return {rama: ramaAcceso, nodo: nodoPrincipal};
+        
     }
 }

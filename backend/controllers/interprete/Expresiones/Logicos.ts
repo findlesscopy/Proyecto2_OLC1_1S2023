@@ -2,7 +2,7 @@ import { Expresion } from "../Abstractas/Expresion";
 import { Return, Type } from "../Abstractas/Return";
 import { Entorno } from "../Abstractas/Entorno";
 import { TipoLogicos } from "../Utils/TipoLogicos";
-
+import generateID  from "../Utils/generadorID";
 export class Logicos extends Expresion{
     constructor(private izq: Expresion, private der: Expresion, private operador: TipoLogicos, linea:number, columna:number) {
         super(linea, columna);
@@ -33,6 +33,29 @@ export class Logicos extends Expresion{
     }
 
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoLogicos${id.toString()}`;
+        const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+        const codigoIzq:{rama:string, nodo:string} = this.izq.drawAst();
+        const codigoDer:{rama:string, nodo:string} = this.der.drawAst();
+
+        let ramaLogicos = `${nodoPrincipal}[label="Logicos"];\n`
+
+        ramaLogicos += `${nodoIDPrincipal}[label="${this.operador}"];\n`;
+
+        ramaLogicos += codigoIzq.rama + "\n"
+
+        ramaLogicos += codigoDer.rama + "\n"
+
+        ramaLogicos += `${nodoPrincipal} -> ${nodoIDPrincipal};\n`
+
+        ramaLogicos += `${nodoIDPrincipal} -> ${codigoIzq.nodo};\n`
+
+        ramaLogicos += `${nodoIDPrincipal} -> ${codigoDer.nodo};\n`
+
+        return {rama: ramaLogicos, nodo: nodoPrincipal};
+        
     }
 }

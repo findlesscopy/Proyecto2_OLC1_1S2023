@@ -1,7 +1,7 @@
 import { Expresion } from "../Abstractas/Expresion";
 import { Entorno } from "../Abstractas/Entorno";
 import { Return, Type } from "../Abstractas/Return";
-
+import generateID from "../Utils/generadorID";
 export class Truncate extends Expresion{
     constructor(private expresion:Expresion, line:number, column:number){
         super(line,column);
@@ -22,6 +22,18 @@ export class Truncate extends Expresion{
     }
 
     public drawAst(): { rama: string; nodo: string } {
-        return { rama: "node", nodo: "" };
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoTruncate${id.toString()}`;
+
+        let ramaTruncate = `${nodoPrincipal}[label="Truncate"];\n`;
+
+        let {rama, nodo} = this.expresion.drawAst();
+
+        ramaTruncate += rama;
+
+        ramaTruncate += `${nodoPrincipal} -> ${nodo};\n`;
+
+        return { rama: ramaTruncate, nodo: nodoPrincipal };
     }
 }

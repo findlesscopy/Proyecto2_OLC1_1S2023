@@ -3,6 +3,7 @@ import { Entorno } from "../Abstractas/Entorno";
 import { Return, Type } from "../Abstractas/Return";
 import { Instruccion } from "../Abstractas/Instruccion";    
 import { Statement } from "./Statement";
+import generateID from "../Utils/generadorID";
 
 export class If extends Instruccion{
     public encontrado: boolean = false
@@ -31,6 +32,32 @@ export class If extends Instruccion{
     }
 
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoIf${id.toString()}`;
+        const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+        const codigoAST:{rama:string, nodo:string} = this.condicion.drawAst();
+        let ramaIf = `${nodoPrincipal}[label="If"];\n`
+
+        ramaIf += codigoAST.rama + "\n"
+
+        ramaIf += `${nodoPrincipal} -> ${codigoAST.nodo};\n`
+
+        const codigoAST2:{rama:string, nodo:string} = this.instrucciones.drawAst();
+
+        ramaIf += codigoAST2.rama + "\n"
+
+        ramaIf += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`
+
+        if(this.insctruccionElse != null){
+            const codigoAST3:{rama:string, nodo:string} = this.insctruccionElse.drawAst();
+
+            ramaIf += codigoAST3.rama + "\n"
+
+            ramaIf += `${nodoPrincipal} -> ${codigoAST3.nodo};\n`
+        }
+
+        return {rama:ramaIf, nodo:nodoPrincipal};
     }
 }

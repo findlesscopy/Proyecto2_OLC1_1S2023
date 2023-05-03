@@ -3,7 +3,7 @@ import { Entorno } from "../Abstractas/Entorno";
 import { Return, Type } from "../Abstractas/Return";
 import { Instruccion } from "../Abstractas/Instruccion";    
 import { Statement } from "./Statement";
-
+import generateID from "../Utils/generadorID";
 export class While extends Instruccion{
     public return_Encontrado: boolean = false;
     public valor_Return: Return = { value: null, type: Type.VOID };
@@ -34,6 +34,24 @@ export class While extends Instruccion{
     }
 
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoWhile${id.toString()}`;
+        const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+        const codigoAST:{rama:string, nodo:string} = this.condicion.drawAst();
+        let ramaWhile = `${nodoPrincipal}[label="While"];\n`
+
+        ramaWhile += codigoAST.rama + "\n"
+
+        ramaWhile += `${nodoPrincipal} -> ${codigoAST.nodo};\n`
+
+        const codigoAST2:{rama:string, nodo:string} = this.instrucciones.drawAst();
+
+        ramaWhile += codigoAST2.rama + "\n"
+
+        ramaWhile += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`
+
+        return {rama:ramaWhile, nodo:nodoPrincipal};
     }
 }

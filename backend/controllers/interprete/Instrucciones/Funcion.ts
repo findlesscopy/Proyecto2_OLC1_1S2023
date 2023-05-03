@@ -2,6 +2,7 @@ import { Instruccion } from "../Abstractas/Instruccion";
 import { Entorno } from "../Abstractas/Entorno";
 import { Expresion } from '../Abstractas/Expresion';
 import { Return, Type } from "../Abstractas/Return";
+import generateID from "../Utils/generadorID";
 
 export class Funcion extends Instruccion{
 
@@ -19,6 +20,36 @@ export class Funcion extends Instruccion{
     }
     
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+        const id = generateID(15);
+
+        const nodoPrincipal = `nodoFuncion${id.toString()}`;
+        const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+        let ramaFuncion = `${nodoPrincipal}[label="Funcion"];\n`;
+
+        ramaFuncion += `${nodoIDPrincipal}[label="${this.id}"];\n`;
+
+        ramaFuncion += `${nodoPrincipal} -> ${nodoIDPrincipal};\n`;
+
+        if (this.parametros != null) {
+            for(let i = 0; i < this.parametros.length; i++){
+                const codigoAST2: { rama: string; nodo: string } =  this.parametros[i].drawAst();
+                ramaFuncion += codigoAST2.rama + "\n";
+                ramaFuncion += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`;
+            }
+
+        }
+
+        if (this.statement != null) {
+            const codigoAST2: { rama: string; nodo: string } =
+                this.statement.drawAst();
+
+            ramaFuncion += codigoAST2.rama + "\n";
+
+            ramaFuncion += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`;
+        }
+
+        return { rama: ramaFuncion, nodo: nodoPrincipal };
+            
     }
 }

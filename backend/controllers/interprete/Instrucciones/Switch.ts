@@ -5,6 +5,7 @@ import { Instruccion } from "../Abstractas/Instruccion";
 import { Statement } from "./Statement";
 import { Case } from "./Case";
 import { Default } from "./Default";
+import generateID from "../Utils/generadorID";
 
 export class Switch extends Instruccion{
 
@@ -36,7 +37,32 @@ export class Switch extends Instruccion{
     }
 
     public drawAst(): { rama: string; nodo: string; } {
-        return {rama: "node", nodo: ""};
+       const id = generateID(15);
+
+         const nodoPrincipal = `nodoSwitch${id.toString()}`;
+            const nodoIDPrincipal = `nodoID${id.toString()}`;
+
+            const codigoAST:{rama:string, nodo:string} = this.expresion.drawAst();
+            let ramaSwitch = `${nodoPrincipal}[label="Switch"];\n`
+
+            ramaSwitch += codigoAST.rama + "\n"
+
+            ramaSwitch += `${nodoPrincipal} -> ${codigoAST.nodo};\n`
+
+            this.cases.forEach(caso => {
+                const codigoAST2:{rama:string, nodo:string} = caso.drawAst();
+                ramaSwitch += codigoAST2.rama + "\n"
+                ramaSwitch += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`
+            }
+            );
+
+            if(this.def != null){
+                const codigoAST2:{rama:string, nodo:string} = this.def.drawAst();
+                ramaSwitch += codigoAST2.rama + "\n"
+                ramaSwitch += `${nodoPrincipal} -> ${codigoAST2.nodo};\n`
+            }
+
+            return {rama:ramaSwitch, nodo:nodoPrincipal};
     }
     
 
