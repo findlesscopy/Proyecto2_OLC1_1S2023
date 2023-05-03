@@ -1,6 +1,6 @@
 import { Expresion } from "../Abstractas/Expresion";
 import { Entorno } from "../Abstractas/Entorno";
-
+import { Type } from "../Abstractas/Return";
 export class LlamadaFuncion extends Expresion {
   constructor(
     private id: string,
@@ -21,7 +21,7 @@ export class LlamadaFuncion extends Expresion {
         for (let i = 0; i < funcion.parametros.length; i++) {
           const valor = this.argumentos[i].execute(env);
           const param = funcion.parametros[i].execute(env);
-
+          
           if (valor.type == param.type) {
             envFun.guardar(
               param.value,

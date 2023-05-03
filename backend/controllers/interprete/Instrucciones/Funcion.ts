@@ -1,10 +1,14 @@
 import { Instruccion } from "../Abstractas/Instruccion";
 import { Entorno } from "../Abstractas/Entorno";
 import { Expresion } from '../Abstractas/Expresion';
-import { Type } from "../Abstractas/Return";
+import { Return, Type } from "../Abstractas/Return";
 
 export class Funcion extends Instruccion{
-    constructor(private tipo:Type,private id:string, public parametros:Array<Expresion>, public statement:Instruccion, line:number, column:number)
+
+    public return_Encontrado: boolean = false;
+    public valor_Return: Return = { value: null, type: Type.VOID };
+
+    constructor(private tipo:Type, private id:string, public parametros:Array<Expresion>, public statement:Instruccion, line:number, column:number)
     {
         super(line, column);
     }

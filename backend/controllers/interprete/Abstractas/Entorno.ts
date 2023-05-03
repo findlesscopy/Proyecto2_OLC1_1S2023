@@ -30,6 +30,22 @@ export class Entorno {
   
     }
 
+    public actualizar_variable(nombre: string, valor: any) {
+      let env: Entorno | null = this;
+  
+      while (env != null) {
+          if (env.variables.has(nombre)) {
+              for (let entry of Array.from(env.variables.entries())) {
+                  if (entry[0] == nombre) {
+                      entry[1].valor = valor;
+                      return
+                  }
+              }
+          }
+          env = env.anterior;
+      }
+  }
+
     // obtener una variable
     public getVar(id: string): Simbolo | null { 
       // verificar el ambito
@@ -96,5 +112,7 @@ export class Entorno {
     // retornar el entorno global
     return env;
   }
+
+  
 }
   

@@ -1,0 +1,55 @@
+int fibo(int n){
+int a = 0;
+int b = 1;
+  
+  for(int i = 2; i <= n; i++){
+    int c;
+    c = a+b;
+    a = b;
+    b = c;
+  }
+  return b;
+}
+
+fibo(10);
+
+
+int par_impar(int n){
+  if(n%2 == 0){
+    return "El numero es par";
+  }else{
+    return "El numero es impar";
+  }
+}
+
+par_impar(33);
+
+void hanoi(int n, string origen, string destino, string medio){
+if (n == 1){
+
+    print("Mover disco 1, desde: "+ origen+ " hasta "+ destino);
+    return ;
+    
+    
+}
+else{
+    hanoi(n - 1, origen, medio, destino);
+    print("Mover disco: "+ n + " desde: "+ origen+ " hasta: "+ destino);
+    hanoi(n - 1, medio, destino, origen );
+}
+        
+
+
+}
+
+main hanoi(2,"A", "C", "B");
+
+void mult(int a, int b){
+  int resultado = 0;
+  for(int i = 0; i < b; i++){
+    resultado = resultado +a;
+  }
+  return resultado;
+}
+
+mult(2,10);

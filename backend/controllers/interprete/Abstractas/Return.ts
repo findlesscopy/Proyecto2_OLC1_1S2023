@@ -4,7 +4,11 @@ export enum Type{
     BOOLEAN = 2,
     CHAR = 3,
     STRING = 4,
-    NULL = 5
+    NULL = 5,
+    VOID = 6,
+    RETURN = 7,
+    BREAK = 8,
+    CONTINUE = 9
 }
 
 export type Return = {
